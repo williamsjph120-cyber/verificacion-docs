@@ -32,9 +32,7 @@ def get_local_url(key: str) -> str:
 
 
 def get_frontend_url() -> str:
-    if settings.CORS_ORIGINS:
-        return settings.CORS_ORIGINS[0]
-    return "http://localhost:5173"
+    return settings.FRONTEND_URL
 
 
 @router.get("/preview-serial/{organization}", response_model=SerialPreviewResponse)
