@@ -49,15 +49,6 @@ export default function Verify() {
     }
   };
 
-  const handleDownload = async () => {
-    try {
-      const res = await verifyAPI.download(org, serial);
-      window.open(res.data.download_url, '_blank');
-    } catch (err) {
-      toast.error('Error al descargar');
-    }
-  };
-
   if (captchaLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -84,7 +75,7 @@ export default function Verify() {
   if (result) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl w-full mx-4">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl w-full mx-4">
           <div className="text-center mb-6">
             <div className="text-green-500 text-5xl mb-4">✓</div>
             <h2 className="text-2xl font-bold text-gray-800">Documento Verificado</h2>
@@ -92,51 +83,64 @@ export default function Verify() {
           </div>
 
           <div className="border-t pt-6 space-y-4">
-            <div>
-              <span className="text-sm text-gray-500">Serial:</span>
-              <p className="font-mono font-bold text-lg">{result.document.serial}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Organización:</span>
-              <p className="font-medium">{result.document.organization}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Tipo de Documento:</span>
-              <p className="font-medium">{result.document.document_type}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Título:</span>
-              <p className="font-medium">{result.document.title}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Titular:</span>
-              <p className="font-medium">{result.document.holder_name}</p>
-            </div>
-            {result.document.holder_id && (
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-sm text-gray-500">ID del Titular:</span>
-                <p className="font-medium">{result.document.holder_id}</p>
+                <span className="text-sm text-gray-500">Serial:</span>
+                <p className="font-mono font-bold text-lg">{result.document.serial}</p>
               </div>
-            )}
-            {result.document.description && (
               <div>
-                <span className="text-sm text-gray-500">Descripción:</span>
-                <p className="font-medium">{result.document.description}</p>
+                <span className="text-sm text-gray-500">Tipo:</span>
+                <p className="font-medium">{result.document.document_type}</p>
               </div>
-            )}
-            <div>
-              <span className="text-sm text-gray-500">Fecha de Verificación:</span>
-              <p className="font-medium">{new Date(result.document.verified_at).toLocaleString('es-DO')}</p>
+              <div>
+                <span className="text-sm text-gray-500">Título:</span>
+                <p className="font-medium">{result.document.title}</p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500">Titular:</span>
+                <p className="font-medium">{result.document.holder_name}</p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500">Organización:</span>
+                <p className="font-medium">{result.document.organization}</p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500">Fecha de Verificación:</span>
+                <p className="font-medium">{new Date(result.document.verified_at).toLocaleString('es-DO')}</p>
+              </div>
             </div>
           </div>
 
+          {result.document.file_url && (
+            <div className="mt-6 border-t pt-6">
+              <h3 className="text-lg font-semibold mb-3">Documento</h3>
+              <iframe
+                src={result.document.file_url}
+                className="w-full border-2 border-gray-200 rounded-lg"
+                style={{ height: '500px' }}
+                title="Documento PDF"
+              />
+              <div className="mt-3 flex gap-2">
+                <a
+                  href={result.document.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
+                >
+                  Abrir en nueva pestaña
+                </a>
+                <a
+                  href={result.document.file_url}
+                  download
+                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 text-sm"
+                >
+                  Descargar
+                </a>
+              </div>
+            </div>
+          )}
+
           <div className="mt-6 flex gap-3 justify-center">
-            <button
-              onClick={handleDownload}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-            >
-              Descargar Documento
-            </button>
             <button
               onClick={() => { setResult(null); setCaptchaText(''); loadCaptcha(); }}
               className="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400"
