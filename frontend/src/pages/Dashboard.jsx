@@ -19,10 +19,9 @@ export default function Dashboard() {
 
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
     document_type: 'Diploma',
     holder_name: '',
-    holder_id: '',
+    issue_date: '',
     organization: 'unicaribe',
   });
 
@@ -69,16 +68,15 @@ export default function Dashboard() {
       const fd = new FormData();
       fd.append('file', file);
       fd.append('title', formData.title);
-      fd.append('description', formData.description);
       fd.append('document_type', formData.document_type);
       fd.append('holder_name', formData.holder_name);
-      fd.append('holder_id', formData.holder_id);
+      fd.append('issue_date', formData.issue_date);
       fd.append('organization', formData.organization);
 
       await documentsAPI.create(fd);
       toast.success('Documento subido exitosamente');
       setShowUpload(false);
-      setFormData({ title: '', description: '', document_type: 'Diploma', holder_name: '', holder_id: '', organization: 'unicaribe' });
+      setFormData({ title: '', document_type: 'Diploma', holder_name: '', issue_date: '', organization: 'unicaribe' });
       fileInputRef.current.value = '';
       loadDocuments();
     } catch (err) {
@@ -189,21 +187,13 @@ export default function Dashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ID del Titular</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Expedición *</label>
                   <input
-                    type="text"
-                    value={formData.holder_id}
-                    onChange={(e) => setFormData({...formData, holder_id: e.target.value})}
+                    type="date"
+                    value={formData.issue_date}
+                    onChange={(e) => setFormData({...formData, issue_date: e.target.value})}
                     className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                    rows="2"
+                    required
                   />
                 </div>
                 <div className="md:col-span-2">
