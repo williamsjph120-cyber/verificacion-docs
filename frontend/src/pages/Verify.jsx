@@ -75,30 +75,15 @@ export default function Verify() {
   if (result) {
     return (
       <div className="min-h-screen bg-white">
-        <nav className="bg-green-600 text-white px-4 py-3">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">✓</span>
-              <span className="font-bold">Documento Verificado</span>
-            </div>
-            <button
-              onClick={() => { setResult(null); setCaptchaText(''); loadCaptcha(); }}
-              className="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-md text-sm"
-            >
-              Verificar Otro
-            </button>
-          </div>
-        </nav>
-
         {result.document.file_url ? (
           <iframe
             src={result.document.file_url}
             className="w-full"
-            style={{ height: 'calc(100vh - 56px)' }}
+            style={{ height: '100vh' }}
             title="Documento PDF"
           />
         ) : (
-          <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 56px)' }}>
+          <div className="flex items-center justify-center h-screen">
             <p className="text-gray-500 text-lg">PDF no disponible</p>
           </div>
         )}
