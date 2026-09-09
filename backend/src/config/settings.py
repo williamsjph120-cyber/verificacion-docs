@@ -29,7 +29,7 @@ class Settings:
     CAPTCHA_WIDTH: int = 200
     CAPTCHA_HEIGHT: int = 80
 
-    CORS_ORIGINS: list = field(default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,https://verificacion-frontend.onrender.com").split(","))
+    CORS_ORIGINS: list = field(default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,https://verificacion-frontend.onrender.com,https://buzon.firmagob.com.do").split(","))
 
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://verificacion-frontend.onrender.com")
 
