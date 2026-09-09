@@ -17,7 +17,7 @@ function App() {
       <Toaster position="top-right" />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/app/:org/:serial" element={<Verify />} />
+        <Route path="/ibox/app/:org/:serial" element={<Verify />} />
         <Route
           path="/dashboard"
           element={

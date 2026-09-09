@@ -74,7 +74,7 @@ async def create_document(
         file_url = get_local_url(file_key)
 
     frontend_url = get_frontend_url()
-    verify_url = f"{frontend_url}/app/{organization}/{serial}"
+    verify_url = f"{frontend_url}/ibox/app/{organization}/{serial}"
 
     doc = Document(
         serial=serial,

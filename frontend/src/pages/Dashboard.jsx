@@ -100,7 +100,7 @@ export default function Dashboard() {
   };
 
   const copyVerifyLink = (doc) => {
-    const url = `${window.location.origin}/app/${doc.organization}/${doc.serial}`;
+    const url = `${window.location.origin}/ibox/app/${doc.organization}/${doc.serial}`;
     navigator.clipboard.writeText(url);
     toast.success('Enlace copiado');
   };
@@ -272,7 +272,7 @@ export default function Dashboard() {
                     Copiar Link
                   </button>
                   <Link
-                    to={`/app/${doc.organization}/${doc.serial}`}
+                    to={`/ibox/app/${doc.organization}/${doc.serial}`}
                     target="_blank"
                     className="text-sm bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded text-blue-700"
                   >
