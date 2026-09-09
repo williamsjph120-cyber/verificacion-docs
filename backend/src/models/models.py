@@ -44,7 +44,7 @@ class Document(Base):
 
     owner_id = Column(String(36), ForeignKey("users.id"))
     owner = relationship("User", back_populates="documents")
-    verifications = relationship("Verification", back_populates="document")
+    verifications = relationship("Verification", back_populates="document", cascade="all, delete-orphan")
 
 
 class Verification(Base):
