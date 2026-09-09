@@ -33,6 +33,23 @@ app.include_router(verify.router)
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(bind=engine)
+    from src.config.database import SessionLocal
+    from src.models.models import User
+    from src.services.auth import hash_password
+    db = SessionLocal()
+    try:
+        admin = db.query(User).filter(User.email == "admin@test.com").first()
+        if not admin:
+            admin = User(
+                email="admin@test.com",
+                full_name="Administrador",
+                password_hash=hash_password("admin123"),
+                is_active=True,
+            )
+            db.add(admin)
+            db.commit()
+    finally:
+        db.close()
 
 
 @app.get("/")
