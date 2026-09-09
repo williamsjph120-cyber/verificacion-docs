@@ -74,81 +74,34 @@ export default function Verify() {
 
   if (result) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl w-full mx-4">
-          <div className="text-center mb-6">
-            <div className="text-green-500 text-5xl mb-4">✓</div>
-            <h2 className="text-2xl font-bold text-gray-800">Documento Verificado</h2>
-            <p className="text-gray-500 mt-2">{result.message}</p>
-          </div>
-
-          <div className="border-t pt-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="text-sm text-gray-500">Serial:</span>
-                <p className="font-mono font-bold text-lg">{result.document.serial}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-500">Tipo:</span>
-                <p className="font-medium">{result.document.document_type}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-500">Título:</span>
-                <p className="font-medium">{result.document.title}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-500">Titular:</span>
-                <p className="font-medium">{result.document.holder_name}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-500">Organización:</span>
-                <p className="font-medium">{result.document.organization}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-500">Fecha de Verificación:</span>
-                <p className="font-medium">{new Date(result.document.verified_at).toLocaleString('es-DO')}</p>
-              </div>
+      <div className="min-h-screen bg-white">
+        <nav className="bg-green-600 text-white px-4 py-3">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">✓</span>
+              <span className="font-bold">Documento Verificado</span>
             </div>
-          </div>
-
-          {result.document.file_url && (
-            <div className="mt-6 border-t pt-6">
-              <h3 className="text-lg font-semibold mb-3">Documento</h3>
-              <iframe
-                src={result.document.file_url}
-                className="w-full border-2 border-gray-200 rounded-lg"
-                style={{ height: '500px' }}
-                title="Documento PDF"
-              />
-              <div className="mt-3 flex gap-2">
-                <a
-                  href={result.document.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
-                >
-                  Abrir en nueva pestaña
-                </a>
-                <a
-                  href={result.document.file_url}
-                  download
-                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 text-sm"
-                >
-                  Descargar
-                </a>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-6 flex gap-3 justify-center">
             <button
               onClick={() => { setResult(null); setCaptchaText(''); loadCaptcha(); }}
-              className="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400"
+              className="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-md text-sm"
             >
               Verificar Otro
             </button>
           </div>
-        </div>
+        </nav>
+
+        {result.document.file_url ? (
+          <iframe
+            src={result.document.file_url}
+            className="w-full"
+            style={{ height: 'calc(100vh - 56px)' }}
+            title="Documento PDF"
+          />
+        ) : (
+          <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 56px)' }}>
+            <p className="text-gray-500 text-lg">PDF no disponible</p>
+          </div>
+        )}
       </div>
     );
   }
