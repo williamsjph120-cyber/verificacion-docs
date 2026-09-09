@@ -46,6 +46,7 @@ export const documentsAPI = {
   },
   get: (id) => api.get(`/documents/${id}`),
   previewSerial: (organization, holderName = 'Titular') => api.get(`/documents/preview-serial/${organization}?holder_name=${encodeURIComponent(holderName)}`),
+  previewQR: (organization, holderName = 'Titular') => api.get(`/documents/preview-qr/${organization}?holder_name=${encodeURIComponent(holderName)}`),
   create: (formData) => api.post('/documents/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),

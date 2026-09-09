@@ -14,7 +14,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [previewSerial, setPreviewSerial] = useState('');
+  const [step, setStep] = useState(1);
+  const [previewData, setPreviewData] = useState(null);
+  const [generating, setGenerating] = useState(false);
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -29,12 +31,6 @@ export default function Dashboard() {
     loadDocuments();
   }, []);
 
-  useEffect(() => {
-    if (showUpload && formData.organization) {
-      loadPreviewSerial();
-    }
-  }, [showUpload, formData.organization, formData.holder_name]);
-
   const loadDocuments = async () => {
     try {
       const res = await documentsAPI.list();
@@ -46,12 +42,20 @@ export default function Dashboard() {
     }
   };
 
-  const loadPreviewSerial = async () => {
+  const handleGenerateQR = async () => {
+    if (!formData.holder_name || !formData.title) {
+      toast.error('Llena el nombre del titular y el título primero');
+      return;
+    }
+    setGenerating(true);
     try {
-      const res = await documentsAPI.previewSerial(formData.organization, formData.holder_name || 'Titular');
-      setPreviewSerial(res.data.serial);
+      const res = await documentsAPI.previewQR(formData.organization, formData.holder_name);
+      setPreviewData(res.data);
+      setStep(2);
     } catch (err) {
-      console.error('Error al obtener serial');
+      toast.error('Error al generar serial y QR');
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -75,15 +79,21 @@ export default function Dashboard() {
 
       await documentsAPI.create(fd);
       toast.success('Documento subido exitosamente');
-      setShowUpload(false);
-      setFormData({ title: '', document_type: 'Diploma', holder_name: '', issue_date: '', organization: 'unicaribe' });
-      fileInputRef.current.value = '';
+      resetForm();
       loadDocuments();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Error al subir documento');
     } finally {
       setUploading(false);
     }
+  };
+
+  const resetForm = () => {
+    setShowUpload(false);
+    setStep(1);
+    setPreviewData(null);
+    setFormData({ title: '', document_type: 'Diploma', holder_name: '', issue_date: '', organization: 'unicaribe' });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleDelete = async (id) => {
@@ -119,7 +129,7 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-semibold text-gray-700">Mis Documentos</h2>
           <button
-            onClick={() => setShowUpload(!showUpload)}
+            onClick={() => { setShowUpload(!showUpload); setStep(1); setPreviewData(null); }}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
           >
             + Subir Documento
@@ -128,76 +138,107 @@ export default function Dashboard() {
 
         {showUpload && (
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h3 className="text-lg font-semibold mb-4">Nuevo Documento</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              {step === 1 ? 'Paso 1: Datos del Documento' : 'Paso 2: Subir PDF'}
+            </h3>
 
-            {previewSerial && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-blue-600">Serial que se generará:</p>
-                <p className="text-2xl font-mono font-bold text-blue-800">{previewSerial}</p>
+            {step === 1 && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Organización *</label>
+                    <select
+                      value={formData.organization}
+                      onChange={(e) => setFormData({...formData, organization: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                    >
+                      {ORGANIZATIONS.map((org) => (
+                        <option key={org.value} value={org.value}>{org.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento *</label>
+                    <select
+                      value={formData.document_type}
+                      onChange={(e) => setFormData({...formData, document_type: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option>Diploma</option>
+                      <option>Certificado</option>
+                      <option>Cédula</option>
+                      <option>Constancia</option>
+                      <option>Otro</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Titular *</label>
+                    <input
+                      type="text"
+                      value={formData.holder_name}
+                      onChange={(e) => setFormData({...formData, holder_name: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Expedición *</label>
+                    <input
+                      type="date"
+                      value={formData.issue_date}
+                      onChange={(e) => setFormData({...formData, issue_date: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleGenerateQR}
+                    disabled={generating}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    {generating ? 'Generando...' : 'Generar Serial y QR'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </div>
             )}
 
-            <form onSubmit={handleUpload} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Organización *</label>
-                  <select
-                    value={formData.organization}
-                    onChange={(e) => setFormData({...formData, organization: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    {ORGANIZATIONS.map((org) => (
-                      <option key={org.value} value={org.value}>{org.label}</option>
-                    ))}
-                  </select>
+            {step === 2 && previewData && (
+              <div className="space-y-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-sm text-green-600 mb-1">Serial generado:</p>
+                  <p className="text-2xl font-mono font-bold text-green-800 mb-2">{previewData.serial}</p>
+                  <p className="text-sm text-green-600">URL de verificación:</p>
+                  <p className="text-sm font-mono text-green-700 break-all">{previewData.verify_url}</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento *</label>
-                  <select
-                    value={formData.document_type}
-                    onChange={(e) => setFormData({...formData, document_type: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option>Diploma</option>
-                    <option>Certificado</option>
-                    <option>Cédula</option>
-                    <option>Constancia</option>
-                    <option>Otro</option>
-                  </select>
+
+                <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Código QR generado:</p>
+                  <img src={previewData.qr_code_url} alt="QR Code" className="w-48 h-48 border-2 border-gray-200 rounded-lg" />
+                  <p className="text-xs text-gray-500 mt-2">Imprime este QR y colócalo en el documento físico</p>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Titular *</label>
-                  <input
-                    type="text"
-                    value={formData.holder_name}
-                    onChange={(e) => setFormData({...formData, holder_name: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Expedición *</label>
-                  <input
-                    type="date"
-                    value={formData.issue_date}
-                    onChange={(e) => setFormData({...formData, issue_date: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Archivo PDF *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Archivo PDF del documento *</label>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -206,24 +247,33 @@ export default function Dashboard() {
                     required
                   />
                 </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleUpload}
+                    disabled={uploading}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {uploading ? 'Subiendo...' : 'Subir Documento'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600"
+                  >
+                    ← Volver
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={uploading}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
-                >
-                  {uploading ? 'Subiendo...' : 'Subir Documento'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowUpload(false)}
-                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
+            )}
           </div>
         )}
 

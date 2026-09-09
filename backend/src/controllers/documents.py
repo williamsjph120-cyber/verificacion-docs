@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from src.config.database import get_db
 from src.config.settings import settings
 from src.models.models import Document, User
-from src.schemas.schemas import DocumentResponse, SerialPreviewResponse
+from src.schemas.schemas import DocumentResponse, SerialPreviewResponse, QRPreviewResponse
 from src.services.auth import get_current_user
 from src.services.qr_generator import generate_qr_code
 from src.services.serial_generator import generate_serial, get_next_serial_preview
@@ -46,6 +46,29 @@ def preview_serial(
 ):
     serial = get_next_serial_preview(db, organization, holder_name)
     return SerialPreviewResponse(serial=serial, organization=organization)
+
+
+@router.get("/preview-qr/{organization}", response_model=QRPreviewResponse)
+def preview_qr(
+    organization: str,
+    holder_name: str = "Titular",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    serial = get_next_serial_preview(db, organization, holder_name)
+    frontend_url = get_frontend_url()
+    verify_url = f"{frontend_url}/ibox/app/{organization}/{serial}"
+
+    qr_data = generate_qr_code(verify_url)
+    qr_base64 = io.BytesIO(qr_data.read()).getvalue()
+    import base64
+    qr_data_url = f"data:image/png;base64,{base64.b64encode(qr_base64).decode('utf-8')}"
+
+    return QRPreviewResponse(
+        serial=serial,
+        verify_url=verify_url,
+        qr_code_url=qr_data_url,
+    )
 
 
 @router.post("/", response_model=DocumentResponse, status_code=201)

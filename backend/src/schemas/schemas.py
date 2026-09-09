@@ -64,6 +64,12 @@ class SerialPreviewResponse(BaseModel):
     organization: str
 
 
+class QRPreviewResponse(BaseModel):
+    serial: str
+    verify_url: str
+    qr_code_url: str
+
+
 class VerifyRequest(BaseModel):
     captcha_text: str
 
