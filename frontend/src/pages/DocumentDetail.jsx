@@ -24,7 +24,7 @@ export default function DocumentDetail() {
   };
 
   const copyVerifyLink = () => {
-    const url = `${window.location.origin}/ibox/app/${doc.organization}/${doc.serial}`;
+    const url = `${window.location.origin}/inbox/app/${doc.organization}/${doc.serial}`;
     navigator.clipboard.writeText(url);
     toast.success('Enlace copiado');
   };
@@ -41,7 +41,7 @@ export default function DocumentDetail() {
   if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   if (!doc) return <div className="min-h-screen flex items-center justify-center">Documento no encontrado</div>;
 
-  const verifyUrl = `${window.location.origin}/ibox/app/${doc.organization}/${doc.serial}`;
+  const verifyUrl = `${window.location.origin}/inbox/app/${doc.organization}/${doc.serial}`;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -90,7 +90,7 @@ export default function DocumentDetail() {
                   Copiar Enlace
                 </button>
                 <Link
-                  to={`/ibox/app/${doc.organization}/${doc.serial}`}
+                  to={`/inbox/app/${doc.organization}/${doc.serial}`}
                   target="_blank"
                   className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm"
                 >

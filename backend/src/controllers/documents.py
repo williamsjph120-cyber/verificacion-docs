@@ -55,7 +55,7 @@ def preview_qr(
 ):
     serial = get_next_serial_preview(db, organization, holder_name)
     frontend_url = get_frontend_url()
-    verify_url = f"{frontend_url}/ibox/app/{organization}/{serial}"
+    verify_url = f"{frontend_url}/inbox/app/{organization}/{serial}"
 
     qr_data = generate_qr_code(verify_url)
     qr_base64 = io.BytesIO(qr_data.read()).getvalue()
@@ -95,7 +95,7 @@ async def create_document(
         file_url = get_local_url(file_key)
 
     frontend_url = get_frontend_url()
-    verify_url = f"{frontend_url}/ibox/app/{organization}/{serial}"
+    verify_url = f"{frontend_url}/inbox/app/{organization}/{serial}"
 
     doc = Document(
         serial=serial,
