@@ -38,7 +38,7 @@ export default function Verify() {
     setLoading(true);
     try {
       await verifyAPI.verify(org, serial, captchaText);
-      window.location.href = `/inbox/app/${org}/${serial}/view`;
+      window.location.href = `/api/verify/${org}/${serial}/view`;
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Error al verificar');
       loadCaptcha();
