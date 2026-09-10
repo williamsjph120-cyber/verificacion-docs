@@ -7,6 +7,7 @@ export default function Verify() {
   const { org, serial } = useParams();
   const [captcha, setCaptcha] = useState(null);
   const [captchaText, setCaptchaText] = useState('');
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [captchaLoading, setCaptchaLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,9 +38,8 @@ export default function Verify() {
 
     setLoading(true);
     try {
-      await verifyAPI.verify(org, serial, captchaText);
-      const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://verificacion-backend.onrender.com';
-      window.location.href = `${backendUrl}/api/verify/${org}/${serial}/view`;
+      const res = await verifyAPI.verify(org, serial, captchaText);
+      setResult(res.data);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Error al verificar');
       loadCaptcha();
@@ -47,6 +47,10 @@ export default function Verify() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getGoogleViewerUrl = (url) => {
+    return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
   };
 
   if (captchaLoading) {
@@ -68,6 +72,20 @@ export default function Verify() {
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600">{error}</p>
         </div>
+      </div>
+    );
+  }
+
+  if (result) {
+    const fileUrl = result.document.file_url;
+    return (
+      <div className="min-h-screen bg-white">
+        <iframe
+          src={getGoogleViewerUrl(fileUrl)}
+          className="w-full h-screen border-0"
+          title="Documento PDF"
+          allow="autoplay"
+        />
       </div>
     );
   }
