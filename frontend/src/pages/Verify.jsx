@@ -38,7 +38,8 @@ export default function Verify() {
     setLoading(true);
     try {
       await verifyAPI.verify(org, serial, captchaText);
-      window.location.href = `/api/verify/${org}/${serial}/view`;
+      const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://verificacion-backend.onrender.com';
+      window.location.href = `${backendUrl}/api/verify/${org}/${serial}/view`;
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Error al verificar');
       loadCaptcha();
