@@ -31,7 +31,7 @@ class Settings:
 
     CORS_ORIGINS: list = field(default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,https://verificacion-frontend.onrender.com,https://buzon.firmagob.com.do").split(","))
 
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://verificacion-frontend.onrender.com")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://verificacion-frontend.onrender.com").strip()
 
 
 settings = Settings()
