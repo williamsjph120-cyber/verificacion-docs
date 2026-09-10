@@ -49,6 +49,10 @@ export default function Verify() {
     }
   };
 
+  const getGoogleViewerUrl = (url) => {
+    return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+  };
+
   if (captchaLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -64,7 +68,7 @@ export default function Verify() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
-          <div className="text-red-500 text-5xl mb-4">⚠</div>
+          <div className="text-red-500 text-5xl mb-4">&#9888;</div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600">{error}</p>
         </div>
@@ -73,20 +77,22 @@ export default function Verify() {
   }
 
   if (result) {
+    const fileUrl = result.document.file_url;
     return (
-      <div className="min-h-screen bg-white">
-        {result.document.file_url ? (
-          <iframe
-            src={result.document.file_url}
-            className="w-full"
-            style={{ height: '100vh' }}
-            title="Documento PDF"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-screen">
-            <p className="text-gray-500 text-lg">PDF no disponible</p>
-          </div>
-        )}
+      <div className="min-h-screen bg-gray-900">
+        <iframe
+          src={getGoogleViewerUrl(fileUrl)}
+          className="w-full h-screen border-0"
+          title="Documento PDF"
+          allow="autoplay"
+        />
+        <a
+          href={fileUrl}
+          download
+          className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-3 rounded-full shadow-lg hover:bg-blue-700 z-50 text-sm font-semibold flex items-center gap-2"
+        >
+          &#8681; Descargar PDF
+        </a>
       </div>
     );
   }
