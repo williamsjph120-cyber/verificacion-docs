@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { verifyAPI } from '../services/api';
 import toast from 'react-hot-toast';
@@ -10,18 +10,10 @@ export default function Verify() {
   const [loading, setLoading] = useState(false);
   const [captchaLoading, setCaptchaLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pdfUrl, setPdfUrl] = useState(null);
-  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     loadCaptcha();
   }, [org, serial]);
-
-  useEffect(() => {
-    return () => {
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-    };
-  }, [pdfUrl]);
 
   const loadCaptcha = async () => {
     setCaptchaLoading(true);
@@ -46,19 +38,13 @@ export default function Verify() {
     setLoading(true);
     try {
       await verifyAPI.verify(org, serial, captchaText);
-      setPdfLoading(true);
-      const response = await fetch(verifyAPI.viewUrl(org, serial));
-      if (!response.ok) throw new Error('Error al cargar PDF');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      setPdfUrl(url);
+      window.location.href = `/inbox/app/${org}/${serial}/view`;
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Error al verificar');
       loadCaptcha();
       setCaptchaText('');
     } finally {
       setLoading(false);
-      setPdfLoading(false);
     }
   };
 
@@ -80,29 +66,6 @@ export default function Verify() {
           <div className="text-red-500 text-5xl mb-4">&#9888;</div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (pdfUrl) {
-    return (
-      <div className="min-h-screen bg-white">
-        <iframe
-          src={pdfUrl}
-          className="w-full h-screen border-0"
-          title="Documento PDF"
-        />
-      </div>
-    );
-  }
-
-  if (pdfLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando documento...</p>
         </div>
       </div>
     );
