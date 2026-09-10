@@ -1,5 +1,7 @@
 import base64
+import io
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from src.config.database import get_db
 from src.config.settings import settings
@@ -122,3 +124,43 @@ def download_document(organization: str, serial: str, db: Session = Depends(get_
     file_url = get_file_url(doc)
 
     return {"download_url": file_url, "filename": f"{doc.serial}.pdf"}
+
+
+@router.get("/{organization}/{serial}/view")
+def view_document(organization: str, serial: str, db: Session = Depends(get_db)):
+    doc = (
+        db.query(Document)
+        .filter(
+            Document.organization == organization,
+            Document.serial == serial,
+            Document.is_active == True,
+        )
+        .first()
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado o inactivo")
+
+    use_r2 = settings.R2_ACCESS_KEY_ID and settings.R2_SECRET_ACCESS_KEY
+
+    if use_r2:
+        from src.services.storage import storage
+        pdf_bytes = storage.s3.get_object(Bucket=storage.bucket, Key=doc.file_key)["Body"].read()
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{doc.serial}.pdf"'},
+        )
+    else:
+        import os
+        from fastapi.staticfiles import StaticFiles
+        upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "uploads")
+        filepath = os.path.join(upload_dir, doc.file_key)
+        if not os.path.exists(filepath):
+            raise HTTPException(status_code=404, detail="Archivo no encontrado")
+        with open(filepath, "rb") as f:
+            pdf_bytes = f.read()
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{doc.serial}.pdf"'},
+        )

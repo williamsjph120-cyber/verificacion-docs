@@ -57,6 +57,7 @@ export const verifyAPI = {
   getCaptcha: (organization, serial) => api.get(`/verify/${organization}/${serial}/captcha`),
   verify: (organization, serial, captchaText) => api.post(`/verify/${organization}/${serial}`, { captcha_text: captchaText }),
   download: (organization, serial) => api.get(`/verify/${organization}/${serial}/download`),
+  viewUrl: (organization, serial) => `${API_BASE}/verify/${organization}/${serial}/view`,
 };
 
 export default api;

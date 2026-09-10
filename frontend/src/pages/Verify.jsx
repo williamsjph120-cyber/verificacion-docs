@@ -7,7 +7,6 @@ export default function Verify() {
   const { org, serial } = useParams();
   const [captcha, setCaptcha] = useState(null);
   const [captchaText, setCaptchaText] = useState('');
-  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [captchaLoading, setCaptchaLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,8 +37,8 @@ export default function Verify() {
 
     setLoading(true);
     try {
-      const res = await verifyAPI.verify(org, serial, captchaText);
-      setResult(res.data);
+      await verifyAPI.verify(org, serial, captchaText);
+      window.location.href = verifyAPI.viewUrl(org, serial);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Error al verificar');
       loadCaptcha();
@@ -47,10 +46,6 @@ export default function Verify() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getGoogleViewerUrl = (url) => {
-    return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
   };
 
   if (captchaLoading) {
@@ -72,27 +67,6 @@ export default function Verify() {
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600">{error}</p>
         </div>
-      </div>
-    );
-  }
-
-  if (result) {
-    const fileUrl = result.document.file_url;
-    return (
-      <div className="min-h-screen bg-gray-900">
-        <iframe
-          src={getGoogleViewerUrl(fileUrl)}
-          className="w-full h-screen border-0"
-          title="Documento PDF"
-          allow="autoplay"
-        />
-        <a
-          href={fileUrl}
-          download
-          className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-3 rounded-full shadow-lg hover:bg-blue-700 z-50 text-sm font-semibold flex items-center gap-2"
-        >
-          &#8681; Descargar PDF
-        </a>
       </div>
     );
   }
