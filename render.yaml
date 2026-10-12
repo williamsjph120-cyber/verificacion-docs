@@ -4,6 +4,7 @@ services:
     runtime: docker
     dockerfilePath: backend/Dockerfile
     dockerContext: .
+    healthCheckPath: /healthz
     envVars:
       - key: DATABASE_URL
         sync: false

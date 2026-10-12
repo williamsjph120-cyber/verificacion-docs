@@ -59,3 +59,11 @@ def root():
         "version": settings.APP_VERSION,
         "docs": "/api/docs",
     }
+
+
+@app.get("/healthz")
+def healthz():
+    # Liviano para keep-alive (UptimeRobot/cron cada 10-12 min).
+    # deliberadamente NO consulta la base de datos: si la DB esta dormida o
+    # el pooler de Supabase esta caido, el ping igual debe responder ok.
+    return {"status": "ok"}
